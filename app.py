@@ -525,21 +525,46 @@ class MainWindow(QMainWindow):
             self._set_capture_exclusion(True)
 
     def _set_capture_exclusion(self, hide: bool):
-        """Use Win32 SetWindowDisplayAffinity to hide/show from screen capture."""
+        """Hide/show this window from ALL screen capture tools AND the taskbar."""
         try:
             hwnd = int(self.winId())
-            # WDA_EXCLUDEFROMCAPTURE = 0x00000011  (Windows 10 2004+)
-            # WDA_NONE               = 0x00000000
+
+            # ── 1. Hide from screen-capture (SetWindowDisplayAffinity) ──
+            # WDA_EXCLUDEFROMCAPTURE = 0x11 (Windows 10 v2004+)
             affinity = 0x00000011 if hide else 0x00000000
-            ok = ctypes.windll.user32.SetWindowDisplayAffinity(hwnd, affinity)
-            if not ok:
-                err = ctypes.get_last_error()
-                self.status_pill.set_status(
-                    "disconnected",
-                    f"Capture-hide failed (err {err})"
-                )
+            ctypes.windll.user32.SetWindowDisplayAffinity(hwnd, affinity)
+
+            # ── 2. Hide from taskbar (extended window style trick) ──
+            GWL_EXSTYLE    = -20
+            WS_EX_TOOLWINDOW = 0x00000080   # hides from taskbar
+            WS_EX_APPWINDOW  = 0x00040000   # forces onto taskbar
+            SWP_NOMOVE     = 0x0002
+            SWP_NOSIZE     = 0x0001
+            SWP_NOZORDER   = 0x0004
+            SWP_FRAMECHANGED = 0x0020
+
+            GetWindowLongPtr = ctypes.windll.user32.GetWindowLongPtrW
+            SetWindowLongPtr = ctypes.windll.user32.SetWindowLongPtrW
+            SetWindowPos     = ctypes.windll.user32.SetWindowPos
+
+            ex_style = GetWindowLongPtr(hwnd, GWL_EXSTYLE)
+            if hide:
+                ex_style = (ex_style | WS_EX_TOOLWINDOW) & ~WS_EX_APPWINDOW
+            else:
+                ex_style = (ex_style & ~WS_EX_TOOLWINDOW) | WS_EX_APPWINDOW
+            SetWindowLongPtr(hwnd, GWL_EXSTYLE, ex_style)
+            # Flush the style change so taskbar updates immediately
+            SetWindowPos(hwnd, None, 0, 0, 0, 0,
+                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED)
+
         except Exception as exc:
             self.status_pill.set_status("disconnected", f"Capture-hide error: {exc}")
+
+    @staticmethod
+    def _apply_affinity_to_hwnd(hwnd: int, hide: bool):
+        """Apply SetWindowDisplayAffinity to any arbitrary HWND."""
+        affinity = 0x00000011 if hide else 0x00000000
+        ctypes.windll.user32.SetWindowDisplayAffinity(hwnd, affinity)
 
     def _toggle_capture_hide(self, state):
         self._hidden_from_capture = bool(state)
@@ -1053,6 +1078,19 @@ class MainWindow(QMainWindow):
             return
 
         dlg = ScreenshotPreviewDialog(pixmap, parent=self)
+
+        # If capture-hide is active, apply it to the preview dialog HWND too,
+        # so the preview window is never visible to screen-recording tools.
+        if self._hidden_from_capture:
+            # We need the native HWND — it's created when the dialog is shown,
+            # so call winId() after exec() starts via a singleShot.
+            def _hide_dlg():
+                try:
+                    self._apply_affinity_to_hwnd(int(dlg.winId()), True)
+                except Exception:
+                    pass
+            QTimer.singleShot(0, _hide_dlg)
+
         if dlg.exec() == QDialog.DialogCode.Accepted and dlg.result_data_url:
             self.pending_image = dlg.result_data_url
             self._img_label.setText("📷  Full-screen screenshot attached")
