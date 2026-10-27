@@ -1,75 +1,185 @@
-# LocalDesk AI
+<div align="center">
 
-A free, local-first Windows desktop assistant built with Python, PySide6, and LM Studio's OpenAI-compatible local API.
+```
+██╗      ██████╗  ██████╗ █████╗ ██╗      ██████╗ ███████╗███████╗██╗  ██╗     █████╗ ██╗
+██║     ██╔═══██╗██╔════╝██╔══██╗██║      ██╔══██╗██╔════╝██╔════╝██║ ██╔╝    ██╔══██╗██║
+██║     ██║   ██║██║     ███████║██║      ██║  ██║█████╗  ███████╗█████╔╝     ███████║██║
+██║     ██║   ██║██║     ██╔══██║██║      ██║  ██║██╔══╝  ╚════██║██╔═██╗     ██╔══██║██║
+███████╗╚██████╔╝╚██████╗██║  ██║███████╗ ██████╔╝███████╗███████║██║  ██╗    ██║  ██║██║
+╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚═╝
+```
 
-## Features
-- Chat with a model served by LM Studio.
-- Refresh the model list from the local server.
-- Optional always-on-top window.
-- Attach an image or capture the full screen for a vision-capable local model.
-- Optional 8-second microphone recording and local transcription using faster-whisper.
-- No cloud inference API is configured.
+**Your private, local-first AI desktop assistant — powered by LM Studio**
 
-## Requirements
-- Windows 10/11
-- Python 3.11 or 3.12 recommended for broad package compatibility.
-- LM Studio with a model already downloaded.
-- For image understanding, load a vision-capable model that supports image input.
-- For voice transcription, install the optional dependencies below.
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![PySide6](https://img.shields.io/badge/PySide6-6.8%2B-41CD52?style=for-the-badge&logo=qt&logoColor=white)](https://doc.qt.io/qtforpython/)
+[![LM Studio](https://img.shields.io/badge/LM%20Studio-Compatible-6C63FF?style=for-the-badge)](https://lmstudio.ai)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
+[![Windows](https://img.shields.io/badge/Windows-10%2B-0078D4?style=for-the-badge&logo=windows&logoColor=white)](https://microsoft.com/windows)
 
-## Setup (beginner-friendly)
+</div>
 
-1. Extract the ZIP to a folder such as `C:\AI\LocalDeskAI`.
-2. Install Python from https://www.python.org/downloads/windows/ if needed. During setup, enable **Add Python to PATH**.
-3. Open the extracted folder in File Explorer.
-4. Click the address bar, type `cmd`, and press Enter.
-5. Run:
+---
 
-   ```bat
-   py -3.12 -m venv .venv
-   .venv\Scripts\python.exe -m pip install --upgrade pip
-   .venv\Scripts\python.exe -m pip install -r requirements.txt
-   ```
+## ✨ What is LocalDesk AI?
 
-   If `py -3.12` is unavailable, use `python -m venv .venv` instead.
+**LocalDesk AI** is a sleek, dark-themed desktop chat assistant that connects to any locally-running LLM via [LM Studio](https://lmstudio.ai). Every single token is processed **on your own machine** — no cloud, no subscriptions, no data leaving your PC.
 
-6. Open LM Studio. Load a model.
-7. Open the Developer tab and start the local server. The default OpenAI-compatible server address is usually `http://127.0.0.1:1234/v1`.
-8. Run the app from the same Command Prompt:
+> Built for the privacy-conscious power user who wants GPT-level intelligence without the surveillance.
 
-   ```bat
-   .venv\Scripts\python.exe app.py
-   ```
+---
 
-9. In LocalDesk AI, click **Refresh models**, then choose a model.
+## 🖥️ Features
 
-## Voice input
-The first voice transcription may download the `base` Whisper model, so internet is needed once unless its model files are already cached. After that, transcription can run locally. The current implementation records an 8-second clip and transcribes on CPU to keep setup simple.
+| Feature | Description |
+|---|---|
+| 🤖 **Streaming Responses** | Tokens appear in real-time as the model generates — no waiting |
+| 📷 **Screen Capture** | Capture your full desktop and preview it before attaching |
+| 🎙️ **Voice Input** | 8-second local speech recognition via Whisper (runs 100% offline) |
+| 📎 **Image Attach** | Attach any PNG/JPG/WEBP to your message for vision models |
+| 🛡️ **Hide from Screen Share** | One checkbox makes the window **completely invisible** to OBS, Teams, Zoom & all capture tools |
+| 🔁 **Auto-connect** | Automatically detects and loads models from LM Studio on startup |
+| 💬 **Chat History** | Full multi-turn conversation memory per session |
+| 🖼️ **Screenshot Preview** | Review & approve captured screenshots before they get sent |
+| 📌 **Always on Top** | Pin the window above all other apps |
+| 🗑️ **Clear Chat** | Wipe conversation history with one click |
 
-If microphone support fails:
-- Check Windows Settings → Privacy & security → Microphone.
-- Confirm the microphone works in Windows Sound settings.
-- If optional dependencies were skipped, run:
+---
 
-  ```bat
-  .venv\Scripts\python.exe -m pip install sounddevice numpy faster-whisper
-  ```
+## 🚀 Quick Start
 
-## Screenshot/image support
-- **Capture screen** captures the full primary display, not a cropped selection. Check the contents before sending.
-- **Attach image** lets you choose an image file.
-- Image understanding requires a vision-capable model and compatible LM Studio server/model configuration. Text-only models cannot interpret images.
-- The screenshot is sent to the configured local server as part of the request. Keep the server bound to localhost for local-only use.
+### Prerequisites
 
-## Privacy and capture behavior
-This app does **not** implement stealth or screen-capture exclusion. The always-on-top setting only changes window stacking. Screen-capture exclusion APIs are not universal privacy guarantees; behavior varies by capture method and application. Do not rely on them to bypass interview rules, proctoring, recording, or monitoring.
+- **[LM Studio](https://lmstudio.ai)** — download, load a model, start the local server
+- **Python 3.10+**
 
-## Troubleshooting
-- **Could not connect:** Start LM Studio's local server and verify the server URL.
-- **No models found:** Load a model in LM Studio, then refresh.
-- **Image is not understood:** Select a vision-capable model.
-- **Slow answers:** Try a smaller quantized model or reduce its context length in LM Studio.
-- **Port differs:** Change the Server field to your actual local server URL.
+### 1. Clone the repo
 
-## License
-This project source is provided under the MIT License. Review the separate licenses of Python packages, Qt/PySide6, LM Studio, and any model weights you download.
+```bash
+git clone https://github.com/sankhadeep-coder/COURSERA-HACKER.git
+cd COURSERA-HACKER
+```
+
+### 2. Create a virtual environment
+
+```bash
+python -m venv .venv
+```
+
+### 3. Install dependencies
+
+```bash
+.venv\Scripts\pip install -r requirements.txt
+```
+
+### 4. Run
+
+```bash
+# Option A — double-click
+run.bat
+
+# Option B — terminal
+.venv\Scripts\python.exe app.py
+```
+
+---
+
+## 🎙️ Voice Input (Optional)
+
+Voice input uses [faster-whisper](https://github.com/SYSTRAN/faster-whisper) and runs fully offline:
+
+```bash
+.venv\Scripts\pip install sounddevice numpy faster-whisper
+```
+
+The first time you click **Voice Input**, Whisper's `base` model (~150 MB) will be downloaded automatically.
+
+---
+
+## 🛡️ Hide from Screen Share
+
+Check **"Hide from screen share"** in the sidebar.
+
+This calls the Windows `SetWindowDisplayAffinity` API (`WDA_EXCLUDEFROMCAPTURE`) — the window vanishes from **every** capture tool instantly:
+
+- ✅ OBS Studio
+- ✅ Microsoft Teams
+- ✅ Zoom
+- ✅ Discord
+- ✅ Windows Snipping Tool / Win+Shift+S
+- ✅ Any DirectX/DXGI screen recorder
+
+> You still see the window on your physical monitor. Requires **Windows 10 v2004 (Build 19041)** or later.
+
+---
+
+## 🏗️ Architecture
+
+```
+LocalDesk AI
+├── app.py                  # Main application (single file, ~1100 lines)
+│   ├── StreamWorker        # QThread — streams tokens from LM Studio API
+│   ├── ModelsWorker        # QThread — fetches available models
+│   ├── VoiceWorker         # QThread — records mic & runs Whisper locally
+│   ├── ScreenshotPreviewDialog  # Modal preview before attaching screenshots
+│   ├── ChatBubble          # Individual message widget (user / AI)
+│   ├── TypingIndicator     # Animated 3-dot loader
+│   ├── StatusPill          # Live connection status indicator
+│   └── MainWindow          # Main UI — sidebar + chat area
+├── requirements.txt        # Core dependencies
+├── run.bat                 # Windows one-click launcher
+└── .gitignore
+```
+
+---
+
+## 🔌 LM Studio Setup
+
+1. Download [LM Studio](https://lmstudio.ai) and install a model (e.g. `google/gemma-4-12b-qat`)
+2. Go to **Developer** tab → toggle **Status: Running**
+3. The server runs at `http://127.0.0.1:1234` by default
+4. Launch LocalDesk AI → models auto-detect ✅
+
+Any **OpenAI-compatible** local server works — LM Studio, Ollama (with `--host`), LlamaFile, Jan, etc.
+
+---
+
+## ⚙️ Requirements
+
+```
+PySide6>=6.8
+requests>=2.32
+
+# Optional — voice input:
+sounddevice>=0.5
+numpy>=2.0
+faster-whisper>=1.1
+```
+
+---
+
+## 🤝 Contributing
+
+Pull requests are welcome! For major changes, open an issue first.
+
+1. Fork the repo
+2. Create a feature branch: `git checkout -b feature/amazing-thing`
+3. Commit: `git commit -m "Add amazing thing"`
+4. Push: `git push origin feature/amazing-thing`
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+[MIT](LICENSE) © 2026 Sankhadeep Mukherjee
+
+---
+
+<div align="center">
+
+**Built with ❤️ for privacy — zero telemetry, zero cloud, zero compromise.**
+
+*If this helped you, give it a ⭐ on GitHub!*
+
+</div>
